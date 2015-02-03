@@ -12,7 +12,7 @@
         $(function ()
         {
             $('#nospin').segmentPicker({
-                segments: [{ min: 0, max: 9 }, "-", { min: 00, max: 99 }, "-", { min: 000, max: 999 }, "-", { min: 0000, max: 9999 }],
+                segments: [{ min: 0, max: 9 }, "-", { min: 00, max: 50 }, "-", { min: 000, max: 999 }, "-", { min: 0000, max: 9999 }],
                 onBlur: function( segments)
                 {
                     $("#RepVal").text($(this).val());
@@ -22,50 +22,7 @@
             });
 
 
-            $('#12h-picker').segmentPicker({
-                segments: [{min: 1, max: 12}, ":", {min: 0, max: 59}, " ", ["am", "pm"]],
-                onIncrement: function(newVal, oldVal, segments, selectedSegment)
-                {
-                    if(selectedSegment == 0 && oldVal == "11" && newVal == "12")
-                        segments[4].increment();
-                    else if(selectedSegment == 2 && oldVal == "59" && newVal == "00")
-                        segments[0].increment()
-                },
-                onDecrement: function(newVal, oldVal, segments, selectedSegment){
-                    if(selectedSegment == 0 && oldVal == "12" && newVal == "11")
-                        segments[4].decrement();
-                    else if(selectedSegment == 2 && oldVal == "00" && newVal == "59")
-                        segments[0].decrement()
-                }
-            });
-
-            $('#24h-picker').segmentPicker({
-                segments: [{min: 0, max: 23}, ":", {min: 0, max: 59}],
-                onIncrement: function(newVal, oldVal, segments, selectedSegment)
-                {
-                    if(selectedSegment == 2 && oldVal == "59" && newVal == "00")
-                        segments[0].increment()
-                },
-                onDecrement: function(newVal, oldVal, segments, selectedSegment){
-                    if(selectedSegment == 2 && oldVal == "00" && newVal == "59")
-                        segments[0].decrement()
-                }
-            });
-
-            $('#duration-picker').segmentPicker({
-                segments: [{min: 0, max: 24}, "h ", {min: 0, max: 59}, "m"]
-            });
-
-            $('#currency-picker').segmentPicker({
-                segments: [{min: 1, max: 24}, ".", {min: 0, max: 99}, " ", ["USD", "EUR"]]
-            });
-
-            $('#speed-picker').segmentPicker({
-                segments: [{min: 0, max: 999}, ".", {min: 0, max: 99}, " km/h"]
-            }).on('change keyup', function ()
-            {
-                console.log('$(this).val()', $(this).val());
-            });
+          
         });
     </script>
     <style>
@@ -80,40 +37,6 @@
 </head>
 
 <body>
-<div>
-    <label>
-        Speed picker
-        <input type="text" id="speed-picker" value="123.23 km/h" style="
-height: 35px;
-box-sizing: border-box;"/>
-    </label>
-</div>
-<div>
-    <label>
-        12h time picker
-        <input type="text" id="12h-picker" value="12:30 pm" style="font-size: 20px"/>
-    </label>
-</div>
-<div>
-    <label>
-        24h time picker
-        <input type="text" id="24h-picker" value="19:00" style="padding: 10px"/>
-    </label>
-</div>
-<div>
-    <label>
-        Duration picker - for stoppers etc.
-        <input type="text" id="duration-picker" value="12h 17m" style="margin:10px"/>
-    </label>
-</div>
-
-<div>
-    <label>
-        Currency picker
-        <input type="text" id="currency-picker" value="12.99 USD"/>
-    </label>
-</div>
-
     
 <div>
     <label>
