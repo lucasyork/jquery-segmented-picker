@@ -18,17 +18,18 @@
             $("#svwidg").svInput(
                 {
                     dftype: "N",
-                    name: "SegmentedValidatedInput",
+					dflength: 5,
                     target: "",
                     key: "",
                     enabled: true,
                     segments: [
-                        { type: "N", maxLength: 2, hint: "LongHint" },
-                        { type: "-", hint: " - " },
-                        { maxLength: 5, hint: "Seg2", type: "A" },
-                        { hint: "3", max: 9 },
-                        { type: "-", hint: " and " },
-                        { hint: "regex", maxLength: 10, regex: /[a-zA-Z]\w/ }
+                        { type: "N", maxLength: 2, hint: "01", title: "Two-digit number" },
+                        { type: "-", hint: " - ", code: "-" },
+                        { maxLength: 5, hint: "Seg2", type: "A", title: "5-letter word" },
+						{ type: "-", hint: " - ", code: "-" },
+                        { type: "N", hint: "3", max: 90, title: "max 90" },
+                        { type: "-", hint: " and ", code: " " },
+                        {   }
                     ] // the segments!
                 });
           
@@ -64,6 +65,12 @@
             Valid?:
         </label>
         <span id="RepVal">...</span>
+    </div>
+	<div>
+        <label>
+           Output:
+        </label>
+        <span id="outval">...</span>
     </div>
 </body>
 

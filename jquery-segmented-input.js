@@ -7,7 +7,7 @@ $.widget('ly.svInput', {
             key: "",    // additional identifier sent to target
             enabled: true,   // enables/disables segment inputs
             segments: [], // the segments!
-            dftype: "N",  // the default type used when not specified in segment -- HardSeparatorType "-", NumericInputType "N", AlphanumericInputType "A", ValidatedInputType "V"
+            dftype: "-",  // the default type used when not specified in segment -- HardSeparatorType "-", NumericInputType "N", AlphanumericInputType "A", ValidatedInputType "V"
             dflength: 5 //the default maxLength used when all other efforts fail
             //and more?
         }
@@ -20,20 +20,17 @@ $.widget('ly.svInput', {
     _create: function () {
         var svI = this;
         var originalInput = this.element, originalName = originalInput.attr("name");
+		var disableflag = "";
         if (typeof originalName == "undefined") { originalName = originalInput.attr("id"); }
-
-        var inputTemplate = "<input class='ly-svInput'></input>";
+		if (!svI.options.enabled) { disableflag = "disabled"; }
+        var inputTemplate = "<input type='text' class='ly-svInput' " + disableflag + "/>";
         var workingSegment;
-        
-        var segregN = /\d/;  //numeric regex
-        var segregA = /\w/g; //alphanumeric regex
-        var segregV = /\w/g; //validated regex
-
+       
         for (var i = 0; i < svI.options.segments.length; i++) {
             var Seg = svI.options.segments[i];
             var segType = Seg.type;
-            var segLength = Seg.maxLength, segMax = Seg.max, segMin = Seg.min;
-            var segHint = Seg.hint;
+            var segLength = Seg.maxLength, segMinLength = Seg.minLength, segMax = Seg.max, segMin = Seg.min;
+            var segHint = Seg.hint, segTitle = Seg.title, segCode = Seg.code;
             if (typeof segLength == "undefined") {
                 if (typeof segMax == "undefined") {
                     if (typeof segMin == "undefined") {
@@ -46,30 +43,44 @@ $.widget('ly.svInput', {
                 }
             }
             if (typeof segHint == "undefined") { segHint = ""; }
-
+			if (typeof segMinLength == "undefined") { segMinLength = segLength; }
             if (typeof segType == "undefined") { segType = svI.options.dftype; }
+			if (typeof segTitle == "undefined") { segTitle = segHint; }
             if (segType == "A" || segType == "N" || segType == "V") {
                 workingSegment = $(inputTemplate).addClass("ly-sv" + segType)
                     .attr("id", originalName + "_i" + i)
                     .attr("maxlength", segLength)
+					.attr("minlength", segMinLength)
                     .attr("size", segLength)
                     .attr("placeholder", segHint)
-                    .attr("title", segHint);
-
+                    .attr("title", segTitle);
+			if (typeof segMax != "undefined") { workingSegment.attr("max", segMax); }
+			if (typeof segMin != "undefined") { workingSegment.attr("min", segMin); }
+			if (typeof segCode != "undefined") { workingSegment.data("code", segCode); }
+					
+					
+					
+		var segregN = new RegExp("\\d{" + segMinLength + "," +  segLength + "}");  //numeric regex
+        var segregA = new RegExp("\\w{" + segMinLength + "," +  segLength + "}"); //alphanumeric regex
+        var segregV = new RegExp("\\w{" + segMinLength + "," +  segLength + "}"); //validated regex 
+		
                 if (typeof Seg.regex != "undefined") {
                     workingSegment.data("pattern", Seg.regex);
                 } else {
                     var segReg = "";
-                    if (segType == "N") { segReg = segregN; }
-                    if (segType == "A") { segReg = segregA; }
-                    if (segType == "V") { segReg = segregV; }
+						 if (segType == "N") { segReg = segregN; }
+                    else if (segType == "A") { segReg = segregA; }
+                    else if (segType == "V") { segReg = segregV; }
                     workingSegment.data("pattern", segReg);
                 }
 
                     originalInput.before(workingSegment);                
             }
             else if (segType == "-") {
-                workingSegment = $("<span class='ly-svInput ly-separator'>" + segHint + "</span>");
+				
+				if (typeof segCode == "undefined") { segCode = ""; }
+				
+                workingSegment = $("<span class='ly-svInput ly-separator' data-code='" + segCode + "'>" + segHint + "</span>");
                 originalInput.before(workingSegment);
             }
             else {
@@ -85,17 +96,47 @@ $.widget('ly.svInput', {
             var $this = $(this);
             var pat = new RegExp($this.data("pattern"));
             var isValid = false;
+			
+			if ($this.hasClass("ly-svN") && $this.val().length < $this.attr("minlength"))
+			{
+				var adds = parseInt($this.attr("minlength") - $this.val().length);
+				
+				for (var i=0; i < adds; i++)
+				{
+					$this.val("0" + $this.val());
+				}
+			}
 
-            if ($this.val().match(pat) != null) {
-                if ($this.val().length == $this.val().match(pat).length)
-                { isValid = true; }
-                else { isValid = false; }
-            }
+            if ($this.val().match(pat) != null){ 
+			if (!($this.val() > $this.attr("max") || $this.val() < $this.attr("min")))
+				{
+				isValid = true;
+				}			
+			}
+            
             $("#RepVal").text(isValid); //temporary measure!
 
-            if (!isValid) {
-                $this.addClass("ly-svInvalid");
-            }
+            if (!isValid) { $this.addClass("ly-svInvalid");  }
+			else { 
+			$this.removeClass("ly-svInvalid");		
+			}
+		
+		if ($("input.ly-svInvalid").length == 0)
+		{
+			var amalgam  = "";
+			var piece;
+			$(".ly-svInput").each(function(){
+				var $t = $(this);
+				
+				if ($t.data("code")){piece = $t.data("code");}
+				else {piece = $t.val();}
+				amalgam = amalgam + piece;
+			});
+			
+			originalInput.val(amalgam);
+			$("#outval").text(originalInput.val());
+		}
+		
         });
     }
 
